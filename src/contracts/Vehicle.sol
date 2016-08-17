@@ -1,33 +1,51 @@
-contract Vehicle {
-	/* Fields */
-	address private owner;
-	uint public numPreviousOwners = 0;
-	uint public serialNumber;
+import "Tradeable.sol";
+import "StandardMarketplace.sol";
 
-	/* Events */
-	event OwnershipChanged(address newOwner);
+contract Vehicle is StandardTradeable {
 
-	/* Mappings */
-	mapping (uint => address) OwnerHistory;
+	bytes32 vehicleId;
 
-	function Vehicle (uint _serialNumber) {
-		owner = msg.sender;
-		serialNumber = _serialNumber;
+	function Vehicle(bytes32 _vehicleId, Marketplace _market) StandardTradeable(_market) {
+		vehicleId = _vehicleId;
 	}
 
-	modifier isOwner () {
-		if (msg.sender != owner) {
-			throw;
-		}
+	function setOwner(address _owner) onlyBy(market) {
+		owner = _owner;
 	}
 
-	function transfer(address newOwner) isOwner {
-		OwnerHistory[numPreviousOwners++] = owner;
-		owner = newOwner;
-		OwnershipChanged(newOwner);
+}
+
+
+contract DMR is StandardMarketplace {
+	
+	/* Vehicle mapping to license plates */
+	mapping(uint => address) registerIndex;
+	mapping(address => uint) register;
+
+	uint counter = 0;
+
+	/* issueing new car */
+	function issueCar(bytes32 _vehicleId, address _importer) {
+		Vehicle car = new Vehicle(_vehicleId, this);
+		car.setOwner(_importer);
 	}
 
-	function () {
-		throw;
+	/* Registers the car */
+	function completeTransaction(Tradeable _tradeable){
+		var id = counter++;
+
+		register[_tradeable] = id;
+		registerIndex[id] = _tradeable;
+
+		super.completeTransaction(_tradeable);
 	}
 }
+
+/*
+
+	Issue new car
+	Change of ownership
+	MOT
+	Deregistration
+
+*/

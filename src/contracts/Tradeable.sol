@@ -1,20 +1,26 @@
 import "Marketplace.sol";
 
 contract Tradeable {
+	function sell(address _buyer, uint _amount);
+	function transferContract(address _to);
+	function cancelSale();
+}
+
+contract StandardTradeable is Tradeable {
 
 	/* Fields */
 	address public owner;
 	bool private forSale = false;
-	Marketplace private market;
+	Marketplace internal market;
 
 	/* Modifiers */
 	modifier onlyBy(address _addr) { if(msg.sender != _addr) throw; }
 	modifier eitherBy(address _addr1, address _addr2) {
-		if(msg.sender != _addr1 && msg.sender != _addr2) throw; 
+		if(msg.sender != _addr1 && msg.sender != _addr2) throw;
 	}
 
 	/* Constructor */
-	function Tradeable(Marketplace _market){
+	function StandardTradeable(Marketplace _market){
 		owner = msg.sender;
 		market = _market; //The tradeable is born with a given market
 	}

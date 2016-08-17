@@ -7,6 +7,10 @@ contract Marketplace {
 	function completeTransaction(Tradeable _item);
 	function abortTransaction(Tradeable _item);
 	event BuyerAcceptedOffer(Tradeable item);
+	event SellerAddedOffer(Tradeable item);
+	event SellerRevokedOffer(Tradeable item);
+	event BuyerCompletedTransaction(Tradeable item);
+	event BuyerAbortedTransaction(Tradeable item);
 }
 
 // vim: cc=80
