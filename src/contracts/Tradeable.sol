@@ -4,24 +4,35 @@ contract Tradeable {
 
 	/* Fields */
 	address public owner;
-	address market;
+	bool private forSale = false;
+	Marketplace private market;
 
 	/* Modifiers */
-	modifier isOwner() { if(msg.sender != owner) throw; }
-	modifier isMarket() { if(msg.sender != market) throw; }
-
-	function sell(Marketplace _market, address _buyer, uint _amount) isOwner {
-		_market.makeOffer(this, owner, _buyer, _amount);
-		market = _market;
+	modifier onlyBy(address _addr) { if(msg.sender != _addr) throw; }
+	modifier eitherBy(address _addr1, address _addr2) {
+		if(msg.sender != _addr1 && msg.sender != _addr2) throw; 
 	}
 
-	function transferContract(address to) isMarket {
+	/* Constructor */
+	function Tradeable(Marketplace _market){
+		owner = msg.sender;
+		market = _market; //The tradeable is born with a given market
+	}
+
+	function sell(address _buyer, uint _amount) onlyBy(owner) {
+		if(forSale) throw; //Cannot be set for sale if it's already for sale..
+		market.makeOffer(this, owner, _buyer, _amount);
+		forSale = true;
+	}
+
+	function cancelSale() onlyBy(owner) {
+		if(!forSale) throw;
+		market.revokeOffer(this);
+		forSale = false;
+	}
+
+	function transferContract(address to) onlyBy(market) {
 		owner = to;
-		market = 0;
-	}
-
-	function cancelSale() isMarket {
-		market = 0;
 	}
 
 	function () {
@@ -29,3 +40,4 @@ contract Tradeable {
 	}
 }
 
+// vim: cc=80
