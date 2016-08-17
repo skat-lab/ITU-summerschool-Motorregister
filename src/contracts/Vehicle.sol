@@ -1,33 +1,21 @@
-contract Vehicle {
+import "Transferable.sol";
+
+contract Vehicle is Transferable {
 	/* Fields */
-	address private owner;
 	uint public numPreviousOwners = 0;
 	uint public serialNumber;
-
-	/* Events */
-	event OwnershipChanged(address newOwner);
 
 	/* Mappings */
 	mapping (uint => address) OwnerHistory;
 
 	function Vehicle (uint _serialNumber) {
-		owner = msg.sender;
 		serialNumber = _serialNumber;
+
+    // contructor of Transferable automatically called
 	}
 
-	modifier isOwner () {
-		if (msg.sender != owner) {
-			throw;
-		}
-	}
-
-	function transfer(address newOwner) isOwner {
-		OwnerHistory[numPreviousOwners++] = owner;
-		owner = newOwner;
-		OwnershipChanged(newOwner);
-	}
-
-	function () {
-		throw;
-	}
+  function transferContract (address to) {
+    OwnerHistory[numPreviousOwners++] = owner;
+    Transferable.transferContract(to);
+  }
 }
