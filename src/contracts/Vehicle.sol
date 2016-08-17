@@ -10,24 +10,33 @@ contract Vehicle is StandardTradeable {
 	}
 
 	function setOwner(address _owner) onlyBy(market) {
+		if(owner != 0x0) throw;	 //Only a new car can be transfered to an owner.
 		owner = _owner;
 	}
 
+	function commitSuicide() onlyBy(market) {
+		selfdestruct(owner);
+	}
 }
 
 
 contract DMR is StandardMarketplace {
-	
+
 	/* Vehicle mapping to license plates */
 	mapping(uint => address) registerIndex;
 	mapping(address => uint) register;
 
 	uint counter = 0;
+	uint importFee = 10000;
 
 	/* issueing new car */
 	function issueCar(bytes32 _vehicleId, address _importer) {
 		Vehicle car = new Vehicle(_vehicleId, this);
-		car.setOwner(_importer);
+		car.sell(_importer, importFee);
+	}
+
+	function deregisterCar(Vehicle _vehicle){
+		_vehicle.commitSuicide();
 	}
 
 	/* Registers the car */
@@ -40,12 +49,3 @@ contract DMR is StandardMarketplace {
 		super.completeTransaction(_tradeable);
 	}
 }
-
-/*
-
-	Issue new car
-	Change of ownership
-	MOT
-	Deregistration
-
-*/
