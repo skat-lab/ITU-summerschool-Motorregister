@@ -37,8 +37,8 @@ contract Market {
   // Buyer approves, and funds are transfered on hold at the Market
   function receiveApproval(address _from, uint256 _value,
                            address _token, address theContract) {
-    if(_token != address(token)) throw;
-    if(msg.sender != address(token)) throw;
+    if(_token != address(currency)) throw;
+    if(msg.sender != address(currency)) throw;
     
     Transferable c = Transferable(theContract);
     Offer offer = offers[c];
@@ -62,7 +62,7 @@ contract Market {
     // Transfer funds
     currency.transferFrom(this, offer.seller, offer.amount);
 
-    delete offers[_theContract];
+    delete offers[theContract];
   }
 
   // Buyer discards the transaction, and receives the money back
@@ -73,7 +73,7 @@ contract Market {
     currency.transferFrom(this, offer.buyer, offer.amount);
     theContract.cancelTransfer();
 
-    delete offers[_theContract];
+    delete offers[theContract];
   }
 
   modifier isBuyer(Transferable theContract) {
