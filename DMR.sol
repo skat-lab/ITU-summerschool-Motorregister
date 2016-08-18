@@ -63,31 +63,31 @@ contract StandardTradeable is Tradeable {
 	}
 
 
-/* Constructor */
-function StandardTradeable(Marketplace _market){
-	owner = msg.sender;
-	market = _market; //The tradeable is born with a given market
-}
+	/* Constructor */
+	function StandardTradeable(Marketplace _market){
+		owner = msg.sender;
+		market = _market; //The tradeable is born with a given market
+	}
 
-function sell(address _buyer, uint _amount) onlyBy(owner) {
-	if(forSale) throw; //Cannot be set for sale if it's already for sale..
-	market.makeOffer(this, owner, _buyer, _amount);
-	forSale = true;
-}
+	function sell(address _buyer, uint _amount) onlyBy(owner) {
+		if(forSale) throw; //Cannot be set for sale if it's already for sale..
+		market.makeOffer(this, owner, _buyer, _amount);
+		forSale = true;
+	}
 
-function cancelSale() onlyBy(owner) {
-	if(!forSale) throw;
-	market.revokeOffer(this);
-	forSale = false;
-}
+	function cancelSale() onlyBy(owner) {
+		if(!forSale) throw;
+		market.revokeOffer(this);
+		forSale = false;
+	}
 
-function transferContract(address to) onlyBy(market) {
-	owner = to;
-}
+	function transferContract(address to) onlyBy(market) {
+		owner = to;
+	}
 
-function () {
-	throw;
-}
+	function () {
+		throw;
+	}
 }
 
 contract Vehicle is StandardTradeable {
@@ -148,94 +148,94 @@ contract StandardMarketplace is Marketplace {
 		else _
 	}
 
-/* Constructor */
-function StandardMarketplace (Token _token){
-	token = _token;
-	owner = msg.sender;
-}
+	/* Constructor */
+	function StandardMarketplace (Token _token){
+		token = _token;
+		owner = msg.sender;
+	}
 
-function makeOffer(
-	Tradeable _item,
-	address _seller,
-	address _buyer,
-	uint _amount
-) onlyBy(_item) {
+	function makeOffer(
+		Tradeable _item,
+		address _seller,
+		address _buyer,
+		uint _amount
+	) onlyBy(_item) {
 
-	offers[_item] = Offer({
-		seller: _seller,
-		buyer: _buyer,
-		amount: _amount
-	});
+		offers[_item] = Offer({
+			seller: _seller,
+			buyer: _buyer,
+			amount: _amount
+		});
 
-	SellerAddedOffer(_item);
-}
+		SellerAddedOffer(_item);
+	}
 
-function revokeOffer(Tradeable _item) onlyBy(_item) {
-	SellerRevokedOffer(_item);
-	delete offers[_item];
-}
+	function revokeOffer(Tradeable _item) onlyBy(_item) {
+		SellerRevokedOffer(_item);
+		delete offers[_item];
+	}
 
-function acceptOffer(Tradeable _item) {
+	function acceptOffer(Tradeable _item) {
 
-	/* Getting offer from item */
-	var offer = offers[_item];
-	if(offer.buyer != msg.sender) throw;
+		/* Getting offer from item */
+		var offer = offers[_item];
+		if(offer.buyer != msg.sender) throw;
 
-	/* Checking that the buyer have sufficient funds */
-	if(token.allowance(msg.sender, this) < offer.amount) throw;
+		/* Checking that the buyer have sufficient funds */
+		if(token.allowance(msg.sender, this) < offer.amount) throw;
 
-	/* Withdrawing money from buyers account */
-	token.transferFrom(offer.buyer, this, offer.amount);
-	balance[offer.buyer] += offer.amount;
+		/* Withdrawing money from buyers account */
+		token.transferFrom(offer.buyer, this, offer.amount);
+		balance[offer.buyer] += offer.amount;
 
-	/* Notifiying seller about the buyer accepting the offer */
-	BuyerAcceptedOffer(_item);
-}
+		/* Notifiying seller about the buyer accepting the offer */
+		BuyerAcceptedOffer(_item);
+	}
 
-function completeTransaction(Tradeable _item) {
+	function completeTransaction(Tradeable _item) {
 
-	/* Getting offer from item */
-	var offer = offers[_item];
-	if(offer.buyer != msg.sender) throw;
-	if(balance[offer.buyer] < offer.amount) throw;
+		/* Getting offer from item */
+		var offer = offers[_item];
+		if(offer.buyer != msg.sender) throw;
+		if(balance[offer.buyer] < offer.amount) throw;
 
-	/* Depositing amount to sellers account */
-	token.transferFrom(this, offer.seller, offer.amount);
-	balance[offer.buyer] -= offer.amount;
+		/* Depositing amount to sellers account */
+		token.transfer(offer.seller, offer.amount);
+		balance[offer.buyer] -= offer.amount;
 
-	/* Transfering the ownership to the buyer */
-	_item.transferContract(offer.buyer);
-	BuyerCompletedTransaction(_item);
+		/* Transfering the ownership to the buyer */
+		_item.transferContract(offer.buyer);
+		BuyerCompletedTransaction(_item);
 
-	delete offers[_item];
-}
+		delete offers[_item];
+	}
 
-function abortTransaction(Tradeable _item) {
+	function abortTransaction(Tradeable _item) {
 
-	/* Getting offer from item */
-	var offer = offers[_item];
-	if(offer.buyer != msg.sender) throw;
+		/* Getting offer from item */
+		var offer = offers[_item];
+		if(offer.buyer != msg.sender) throw;
 
-	/* Depositing the amount back to the buyer */
-	token.transferFrom(this, offer.buyer, offer.amount);
+		/* Depositing the amount back to the buyer */
+		token.transfer(offer.buyer, offer.amount);
 
-	/* Revoking the markets rights to selling the item */
-	_item.cancelSale();
-	BuyerAbortedTransaction(_item);
+		/* Revoking the markets rights to selling the item */
+		_item.cancelSale();
+		BuyerAbortedTransaction(_item);
 
-	/* Deleting the offer */
-	delete offers[_item];
-}
+		/* Deleting the offer */
+		delete offers[_item];
+	}
 
-function commitSuicide() onlyBy(owner) {
-	selfdestruct(owner);
-}
+	function commitSuicide() onlyBy(owner) {
+		selfdestruct(owner);
+	}
 
-struct Offer {
-	address seller;
-	address buyer;
-	uint amount;
-}
+	struct Offer {
+		address seller;
+		address buyer;
+		uint amount;
+	}
 }
 
 contract DMR is StandardMarketplace{
