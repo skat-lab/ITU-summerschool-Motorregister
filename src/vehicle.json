@@ -1,0 +1,81 @@
+[
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_owner",
+				"type": "address"
+			}
+		],
+		"name": "setOwner",
+		"outputs": [],
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "to",
+				"type": "address"
+			}
+		],
+		"name": "transferContract",
+		"outputs": [],
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_buyer",
+				"type": "address"
+			},
+			{
+				"name": "_amount",
+				"type": "uint256"
+			}
+		],
+		"name": "sell",
+		"outputs": [],
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "commitSuicide",
+		"outputs": [],
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "cancelSale",
+		"outputs": [],
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"name": "_vehicleId",
+				"type": "bytes32"
+			},
+			{
+				"name": "_market",
+				"type": "address"
+			}
+		],
+		"type": "constructor"
+	}
+]

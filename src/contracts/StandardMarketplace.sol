@@ -2,7 +2,7 @@ import "Token.sol";
 import "Tradeable.sol";
 import "Marketplace.sol";
 
-contract StandardMarketplace is Marketplace{
+contract StandardMarketplace is Marketplace {
 
 	/* Fields */
 	address private owner;
